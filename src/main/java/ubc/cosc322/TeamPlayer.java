@@ -132,18 +132,16 @@ public class TeamPlayer extends GamePlayer{
 
 	public void makeMinMaxMove() {
 		Minimax m = new Minimax();
-		List<Object> minimax = m.execMinimax(board, 1, true, playerId);
-
-		// Retrieve the best move (Map<String, ArrayList<Integer>>)
+		List<Object> minimax = m.execMinimax(board, 2, true, playerId, Integer.MIN_VALUE, Integer.MAX_VALUE);
+	
 		Map<String, ArrayList<Integer>> bestMove = (Map<String, ArrayList<Integer>>) minimax.get(1);
-
-		// Access the "queen-position-current" and "queen-position-next" from the best move
+	
 		ArrayList<Integer> queen_pos_curr = bestMove.get("queen-position-current");
 		ArrayList<Integer> queen_pos_next = bestMove.get("queen-position-next");
 		ArrayList<Integer> arrow_pos = bestMove.get("arrow-position");
-
-		System.out.println("MY MOVE: " + queen_pos_curr +", "+ queen_pos_next +", "+ arrow_pos);
-		//Update client, gui, and local board of move.
+	
+		System.out.println("MY MOVE: " + queen_pos_curr + ", " + queen_pos_next + ", " + arrow_pos);
+	
 		gameClient.sendMoveMessage(queen_pos_curr, queen_pos_next, arrow_pos);
 		gamegui.updateGameState(queen_pos_curr, queen_pos_next, arrow_pos);
 		board.updateGameboard(queen_pos_curr, queen_pos_next, arrow_pos, playerId);
