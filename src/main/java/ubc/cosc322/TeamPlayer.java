@@ -148,6 +148,8 @@ public class TeamPlayer extends GamePlayer{
 			// System.out.println();
 			// System.out.println();
 		}
+
+
 		Minimax m = new Minimax();
 		List<Object> minimax = m.execAlphaBetaMinimax(board, depth, true, playerId, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
@@ -234,3 +236,5 @@ public class TeamPlayer extends GamePlayer{
 
  
 }//end of class
+
+
