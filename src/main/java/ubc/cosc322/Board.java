@@ -228,7 +228,7 @@ public class Board {
         }
 
         // BFS for multi-source shortest paths
-        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
         while (!queue.isEmpty()) {
             int[] cell = queue.poll();
             int x = cell[0], y = cell[1], d = cell[2], owner = cell[3];
