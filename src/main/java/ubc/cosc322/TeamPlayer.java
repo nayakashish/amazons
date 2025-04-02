@@ -1,13 +1,12 @@
 
 package ubc.cosc322;
-
 import java.time.Instant;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
 import ygraph.ai.smartfox.games.BaseGameGUI;
 import ygraph.ai.smartfox.games.GameClient;
 import ygraph.ai.smartfox.games.GamePlayer;
@@ -16,23 +15,21 @@ public class TeamPlayer extends GamePlayer{
 
     private GameClient gameClient = null; 
     private BaseGameGUI gamegui = null;
-	
     private String userName = null;
     private String passwd = null;
-
 	private Board board;
 	private int playerId;
 	private int opponantId;
  
-	
     /**
      * The main method
      * @param args for name and passwd (current, any string would work)
      */
+
     public static void main(String[] args) {				 
     	// COSC322Test player = new COSC322Test(args[0], args[1]);
 
-		TeamPlayer player = new TeamPlayer("Team#18remote", "cosc322");
+		TeamPlayer player = new TeamPlayer("Team#18", "cosc322");
 
     	if(player.getGameGUI() == null) {
     		player.Go();
@@ -47,19 +44,21 @@ public class TeamPlayer extends GamePlayer{
     	}
     }
 	
+
     /**
      * Any name and passwd 
      * @param userName
       * @param passwd
      */
+
+
     public TeamPlayer(String userName, String passwd) {
     	this.userName = userName;
     	this.passwd = passwd;
-    	
     	this.gamegui = new BaseGameGUI(this);
-
 		this.board = new Board();
     }
+
 
     @Override
     public void onLogin() {
@@ -68,8 +67,10 @@ public class TeamPlayer extends GamePlayer{
 			gamegui.setRoomInformation(gameClient.getRoomList());
 		}
 
-		gameClient.joinRoom("Kalamalka Lake");
-    }
+
+		gameClient.joinRoom("Beaver Lake");
+    
+	}
 
     @Override
     public boolean handleGameMessage(String messageType, Map<String, Object> msgDetails) {
@@ -83,9 +84,8 @@ public class TeamPlayer extends GamePlayer{
 			gamegui.setGameState((ArrayList<Integer>) msgDetails.get("game-state"));
 			board.setGameboard((ArrayList<Integer>)msgDetails.get("game-state"));
 			
+
 		} else if (messageType.equals("cosc322.game-action.move")) {
-
-
 			System.out.println("Opponant's Move: " + msgDetails); 
 
 			ArrayList<Integer> queenCurr =(ArrayList<Integer>) msgDetails.get("queen-position-current");
@@ -116,7 +116,7 @@ public class TeamPlayer extends GamePlayer{
 			opponantId = playerId==1 ? 2:1; //Set opponantId based on playerId;
 
 			if(playerId == 2) {
-				//if player 2, start by making a move. //Black moves first, according to lecture.
+				//if player 2, start by making a move. Black moves first.
 				System.out.println("I MOVE FIRST.");
 				makeMove();
 			} else {
@@ -138,13 +138,30 @@ public class TeamPlayer extends GamePlayer{
 	public void makeAlphaBetaMove() {
 		Minimax m = new Minimax();
 		Instant timeNow = Instant.now();
-		Duration dur = Duration.ofSeconds(20);
+		Duration dur = Duration.ofSeconds(24);
 		Instant timeEnd = timeNow.plus(dur);
 		int depth = 1;
 		List<Object> minimax = null;
+
+		//storing move data in a hashmap for efficiency
+		HashMap<Integer, Object> moveData = new HashMap<Integer, Object>();
+		moveData.put(0, board);
+		moveData.put(1, depth);
+		moveData.put(2, true);
+		moveData.put(3, playerId);
+		moveData.put(4, Integer.MIN_VALUE);
+		moveData.put(5, Integer.MAX_VALUE);
+		moveData.put(6, timeEnd);
+
 	
 		while(Instant.now().isBefore(timeEnd)) {
-			List<Object> tempSaveMove = m.execAlphaBetaMinimax(board, depth++, true, playerId, Integer.MIN_VALUE, Integer.MAX_VALUE, timeEnd);
+			//before hashmap
+			//List<Object> tempSaveMove = m.execAlphaBetaMinimax(board, depth++, true, playerId, Integer.MIN_VALUE, Integer.MAX_VALUE, timeEnd);
+			
+			
+			List<Object> tempSaveMove = m.execAlphaBetaMinimax(moveData);
+			depth++;
+			
 			if(minimax == null || ((Integer) tempSaveMove.get(0) > (Integer) minimax.get(0))) { //if previous found move better than now or if first run rewrite best move.
 				minimax = tempSaveMove;
 				System.out.println("Found better move: " + tempSaveMove.get(0));

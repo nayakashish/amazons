@@ -1,6 +1,7 @@
 package ubc.cosc322;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.time.Instant;
@@ -77,27 +78,65 @@ public class Minimax {
     }
  
     //Alpha-Beta pruning added to minimax algorithm.
-    public List<Object> execAlphaBetaMinimax(Board board, int depth, boolean isMax, int playerId, int alpha, int beta, Instant endTime) {
+    //before hashmap
+    //public List<Object> execAlphaBetaMinimax(Board board, int depth, boolean isMax, int playerId, int alpha, int beta, Instant endTime) {
+    
+
+    public List<Object> execAlphaBetaMinimax(HashMap<Integer, Object> moveData) {
+    
+        Board board = (Board) moveData.get(0);
+        int depth = (int) moveData.get(1);
+        boolean isMax = (boolean) moveData.get(2);
+        int playerId = (int) moveData.get(3);
+        int alpha = (int) moveData.get(4);
+        int beta = (int) moveData.get(5);
+        Instant endTime = (Instant) moveData.get(6);
+        
+       
+        //remember to increment depth at end of function call.
+
         int opponantId = playerId == 1 ? 2:1;
 
         if(depth == 0 || board.isGameOver() || Instant.now().isAfter(endTime)) { //if time limit exceeded.
+           /*change this to a hashmap!*/
             List<Object> result = new ArrayList<>();
             result.add(board.getUtility(playerId)); //base case only has a utility. No move
+
+            
+
+
             return result;
+
+
         }
 
         if(isMax) { //MAXIMIZER (playerId)
             int bestMove = Integer.MIN_VALUE;
             Map<String, ArrayList<Integer>> bestMoveAction = null;
+            
+            //change lists to a hashmap.
             List<Object> bestResult = new ArrayList<>();
             
             ActionFactory af = new ActionFactory();
+
             List<Map<String, ArrayList<Integer>>> moves = af.getActions(playerId, board);
+
             for (Map<String, ArrayList<Integer>> move : moves) { //for each child of node recursive call till terminal
                 Board testMove = new Board(board.getGameboard()); //make copy of board and simulate move
                 testMove.updateGameboard(move, playerId);
                 
-                List<Object> res = execAlphaBetaMinimax(testMove, depth - 1, false, playerId, alpha, beta, endTime);
+                HashMap<Integer, Object> moveDataRecursive = new HashMap<Integer, Object>();
+		        moveDataRecursive.put(0, testMove);
+		        moveDataRecursive.put(1, depth-1);
+		        moveDataRecursive.put(2, false);
+		        moveDataRecursive.put(3, playerId);
+		        moveDataRecursive.put(4, alpha);
+		        moveDataRecursive.put(5, beta);
+		        moveDataRecursive.put(6, endTime);
+
+                //remember to change result to a hashmap.
+                List<Object> res = execAlphaBetaMinimax(moveDataRecursive);
+
                 int value = (int) res.get(0); //get utility the returned recursive call
                 // int res = execAlphaBetaMinimax(testMove, depth - 1, false, playerId, alpha, beta);
                 // int value = res;
@@ -108,7 +147,9 @@ public class Minimax {
                     bestMoveAction = move;
                 }
 
+                
                 alpha = Math.max(alpha, bestMove);
+                moveData.replace(4, alpha);
 
                 if(beta <= alpha) {
                     // System.out.println("branch pruned");
@@ -121,6 +162,7 @@ public class Minimax {
             //Add best value and move to return.
             bestResult.add(bestMove);
             bestResult.add(bestMoveAction);
+
             return bestResult;
             // return bestMove;
 
@@ -135,8 +177,17 @@ public class Minimax {
             for (Map<String, ArrayList<Integer>> move : moves) {
                 Board testMove = new Board(board.getGameboard()); //make copy of board and simulate move
                 testMove.updateGameboard(move, opponantId);
+
+                HashMap<Integer, Object> moveDataRecursive = new HashMap<Integer, Object>();
+		        moveDataRecursive.put(0, testMove);
+		        moveDataRecursive.put(1, depth-1);
+		        moveDataRecursive.put(2, true); //this is different from the max node.
+		        moveDataRecursive.put(3, playerId);
+		        moveDataRecursive.put(4, alpha);
+		        moveDataRecursive.put(5, beta);
+		        moveDataRecursive.put(6, endTime);
               
-                List<Object> res = execAlphaBetaMinimax(testMove, depth - 1, true, playerId, alpha, beta, endTime);
+                List<Object> res = execAlphaBetaMinimax(moveDataRecursive);
                 int value = (int) res.get(0);
                 // int res = execAlphaBetaMinimax(testMove, depth - 1, true, playerId, alpha, beta);
                 // int value = res;
@@ -155,11 +206,12 @@ public class Minimax {
                 }
             }
             
-            //addd best value and move to return.
+            //add best value and move to return.
             bestResult.add(bestMove);
             bestResult.add(bestMoveAction);
             return bestResult;
             // return bestMove;
         }
+        
     }
 }
