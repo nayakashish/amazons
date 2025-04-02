@@ -1,6 +1,7 @@
 
 package ubc.cosc322;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -145,7 +146,7 @@ public class TeamPlayer extends GamePlayer{
 
 		//storing move data in a hashmap for efficiency
 		HashMap<Integer, Object> moveData = new HashMap<Integer, Object>();
-		moveData.put(0, board);
+		//moveData.put(0, board);
 		moveData.put(1, depth);
 		moveData.put(2, true);
 		moveData.put(3, playerId);
@@ -159,14 +160,14 @@ public class TeamPlayer extends GamePlayer{
 			//List<Object> tempSaveMove = m.execAlphaBetaMinimax(board, depth++, true, playerId, Integer.MIN_VALUE, Integer.MAX_VALUE, timeEnd);
 			
 			
-			List<Object> tempSaveMove = m.execAlphaBetaMinimax(moveData);
-			depth++;
-			moveData.replace(1, depth);
+			List<Object> tempSaveMove = m.execAlphaBetaMinimax(board, moveData);
+			System.out.println(Instant.now());
+			moveData.replace(1, depth+1);
 			
 			if(minimax == null || ((Integer) tempSaveMove.get(0) > (Integer) minimax.get(0))) { //if previous found move better than now or if first run rewrite best move.
 				minimax = tempSaveMove;
 				System.out.println("Found better move: " + tempSaveMove.get(0));
-				System.out.println(Instant.now());
+				
 			}
 		}
 

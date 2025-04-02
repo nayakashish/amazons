@@ -82,9 +82,9 @@ public class Minimax {
     //public List<Object> execAlphaBetaMinimax(Board board, int depth, boolean isMax, int playerId, int alpha, int beta, Instant endTime) {
     
 
-    public List<Object> execAlphaBetaMinimax(HashMap<Integer, Object> moveData) {
+    public List<Object> execAlphaBetaMinimax(Board board, HashMap<Integer, Object> moveData) {
     
-        Board board = (Board) moveData.get(0);
+        //Board board = (Board) moveData.get(0);
         int depth = (int) moveData.get(1);
         boolean isMax = (boolean) moveData.get(2);
         int playerId = (int) moveData.get(3);
@@ -93,7 +93,6 @@ public class Minimax {
         Instant endTime = (Instant) moveData.get(6);
         
        
-        //remember to increment depth at end of function call.
 
         int opponantId = playerId == 1 ? 2:1;
 
@@ -101,8 +100,6 @@ public class Minimax {
            /*change this to a hashmap!*/
             List<Object> result = new ArrayList<>();
             result.add(board.getUtility(playerId)); //base case only has a utility. No move
-
-            
 
 
             return result;
@@ -126,7 +123,8 @@ public class Minimax {
                 testMove.updateGameboard(move, playerId);
                 
                 HashMap<Integer, Object> moveDataRecursive = new HashMap<Integer, Object>();
-		        moveDataRecursive.put(0, testMove);
+               
+		        //moveDataRecursive.put(0, testMove);
 		        moveDataRecursive.put(1, depth-1);
 		        moveDataRecursive.put(2, false);
 		        moveDataRecursive.put(3, playerId);
@@ -135,7 +133,7 @@ public class Minimax {
 		        moveDataRecursive.put(6, endTime);
 
                 //remember to change result to a hashmap.
-                List<Object> res = execAlphaBetaMinimax(moveDataRecursive);
+                List<Object> res = execAlphaBetaMinimax(testMove, moveDataRecursive);
 
                 int value = (int) res.get(0); //get utility the returned recursive call
                 // int res = execAlphaBetaMinimax(testMove, depth - 1, false, playerId, alpha, beta);
@@ -179,7 +177,8 @@ public class Minimax {
                 testMove.updateGameboard(move, opponantId);
 
                 HashMap<Integer, Object> moveDataRecursive = new HashMap<Integer, Object>();
-		        moveDataRecursive.put(0, testMove);
+                
+		        //moveDataRecursive.put(0, testMove);
 		        moveDataRecursive.put(1, depth-1);
 		        moveDataRecursive.put(2, true); //this is different from the max node.
 		        moveDataRecursive.put(3, playerId);
@@ -187,7 +186,7 @@ public class Minimax {
 		        moveDataRecursive.put(5, beta);
 		        moveDataRecursive.put(6, endTime);
               
-                List<Object> res = execAlphaBetaMinimax(moveDataRecursive);
+                List<Object> res = execAlphaBetaMinimax(testMove, moveDataRecursive);
                 int value = (int) res.get(0);
                 // int res = execAlphaBetaMinimax(testMove, depth - 1, true, playerId, alpha, beta);
                 // int value = res;
@@ -199,6 +198,8 @@ public class Minimax {
                 }
 
                 beta = Math.min(beta, bestMove);
+                moveData.replace(5, beta);
+
 
                 if(beta <= alpha) {
                     // System.out.println("branch pruned");
