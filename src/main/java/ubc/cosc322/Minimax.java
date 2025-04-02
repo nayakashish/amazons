@@ -1,13 +1,27 @@
 package ubc.cosc322;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.time.Instant;
-import java.time.Duration;
 
 public class Minimax {
+
+    private ZobristHash hash;
+    private Map<Long, List<Object>> transpositionTable;
+    private int tableUsed = 0;
+    private int branchesPruned = 0;
+
+
+    public Minimax(ZobristHash hash) {
+        this.hash = hash;
+        this.transpositionTable = new HashMap<>();
+    }
+
+    public Minimax() { //overload constructor for old minimax without memoization.
+        
+    }
 
     //This is basic minimax algorithm. Following this function is algorithm with Alpha-Beta pruning.
     //normal node returns will look like List<Map<String, ArrayList<Integer>>>
@@ -21,10 +35,12 @@ public class Minimax {
             return result;
         }
 
+        int bestMove;
+        List<Object> bestResult = new ArrayList<>();
+        Map<String, ArrayList<Integer>> bestMoveAction = null;
+        
         if(isMax) { //MAXIMIZER (playerId)
-            int bestMove = Integer.MIN_VALUE;
-            Map<String, ArrayList<Integer>> bestMoveAction = null;
-            List<Object> bestResult = new ArrayList<>();
+            bestMove = Integer.MIN_VALUE;
             
             ActionFactory af = new ActionFactory();
             List<Map<String, ArrayList<Integer>>> moves = af.getActions(playerId, board);
@@ -42,17 +58,9 @@ public class Minimax {
                 }
             }
 
-            //Add best value and move to return.
-            bestResult.add(bestMove);
-            bestResult.add(bestMoveAction);
-            return bestResult;
-
         } else { //MINIMIZER (opponantId)
-            int bestMove = Integer.MAX_VALUE;
-            Map<String, ArrayList<Integer>> bestMoveAction = null;
+            bestMove = Integer.MAX_VALUE;
             
-            List<Object> bestResult = new ArrayList<>();
-
             ActionFactory af = new ActionFactory();
             List<Map<String, ArrayList<Integer>>> moves = af.getActions(opponantId, board);
             for (Map<String, ArrayList<Integer>> move : moves) { //for every child node
@@ -69,12 +77,13 @@ public class Minimax {
                    bestMoveAction = move;
                 }
             }
-
-            //addd best value and move to return.
-            bestResult.add(bestMove);
-            bestResult.add(bestMoveAction);
-            return bestResult;
         }
+        
+        //addd best value and move to return.
+        bestResult.add(bestMove);
+        bestResult.add(bestMoveAction);
+
+        return bestResult;
     }
  
     //Alpha-Beta pruning added to minimax algorithm.
@@ -95,6 +104,9 @@ public class Minimax {
        
 
         int opponantId = playerId == 1 ? 2:1;
+        int bestMove;
+        List<Object> bestResult = new ArrayList<>();
+        Map<String, ArrayList<Integer>> bestMoveAction = null;
 
         if(depth == 0 || board.isGameOver() || Instant.now().isAfter(endTime)) { //if time limit exceeded.
            /*change this to a hashmap!*/
@@ -107,12 +119,17 @@ public class Minimax {
 
         }
 
+        long boardHash = hash.computeBoardHash(board);
+        if(transpositionTable.containsKey(boardHash)) {
+            bestResult = transpositionTable.get(boardHash);
+            tableUsed++;
+            // System.out.println("FOUND HASH " + ++tableUsed);
+        }
+
+
         if(isMax) { //MAXIMIZER (playerId)
-            int bestMove = Integer.MIN_VALUE;
-            Map<String, ArrayList<Integer>> bestMoveAction = null;
-            
-            //change lists to a hashmap.
-            List<Object> bestResult = new ArrayList<>();
+            bestMove = Integer.MIN_VALUE;
+          
             
             ActionFactory af = new ActionFactory();
 
@@ -151,25 +168,16 @@ public class Minimax {
 
                 if(beta <= alpha) {
                     // System.out.println("branch pruned");
+                    branchesPruned++;
                     break; //prune branches.
                 }
 
                 
             }
             
-            //Add best value and move to return.
-            bestResult.add(bestMove);
-            bestResult.add(bestMoveAction);
-
-            return bestResult;
-            // return bestMove;
-
         } else { //MINIMIZER (opponantId)
-            int bestMove = Integer.MAX_VALUE;
-            Map<String, ArrayList<Integer>> bestMoveAction = null;
+            bestMove = Integer.MAX_VALUE;
             
-            List<Object> bestResult = new ArrayList<>();
-
             ActionFactory af = new ActionFactory();
             List<Map<String, ArrayList<Integer>>> moves = af.getActions(opponantId, board);
             for (Map<String, ArrayList<Integer>> move : moves) {
@@ -202,17 +210,36 @@ public class Minimax {
 
 
                 if(beta <= alpha) {
+                    branchesPruned++;
                     // System.out.println("branch pruned");
                     break; //prune branch
                 }
             }
             
-            //add best value and move to return.
-            bestResult.add(bestMove);
-            bestResult.add(bestMoveAction);
-            return bestResult;
-            // return bestMove;
         }
-        
+
+
+        //addd best value and move to return.
+        bestResult.add(bestMove);
+        bestResult.add(bestMoveAction);
+
+        //add move to table (memoization)
+        transpositionTable.put(boardHash, bestResult);
+
+        return bestResult;
+        // return bestMove;
     }
+
+    public int getTableUsed() {
+        return this.tableUsed;
+    }
+
+    public int getBranchesPruned() {
+        return this.branchesPruned;
+    }
+
+
+
 }
+
+//I AM WHITE PLAYER

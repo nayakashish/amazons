@@ -23,6 +23,8 @@ public class TeamPlayer extends GamePlayer{
 	private int playerId;
 	private int opponantId;
  
+	private ZobristHash zHash;
+	private Minimax m;
     /**
      * The main method
      * @param args for name and passwd (current, any string would work)
@@ -86,7 +88,11 @@ public class TeamPlayer extends GamePlayer{
 			gamegui.setGameState((ArrayList<Integer>) msgDetails.get("game-state"));
 			board.setGameboard((ArrayList<Integer>)msgDetails.get("game-state"));
 			
-
+			//Set up memoization
+			this.zHash = new ZobristHash(board);
+			this.m = new Minimax(zHash);
+			
+			
 		} else if (messageType.equals("cosc322.game-action.move")) {
 			System.out.println("Opponant's Move: " + msgDetails); 
 
@@ -100,6 +106,8 @@ public class TeamPlayer extends GamePlayer{
 
 			if(board.isGameOver()) {
 				System.err.println("GAME OVER; Good game.");
+				System.out.println("Overall Branches Pruned: " + m.getBranchesPruned());
+				System.out.println("Overall Successful Table References: " + m.getTableUsed());
 				return false;
 			}
 			//return with move.
@@ -138,7 +146,7 @@ public class TeamPlayer extends GamePlayer{
 	}
 
 	public void makeAlphaBetaMove() {
-		Minimax m = new Minimax();
+		//Setup timing max of 24 seconds before exiting recusive stack
 		Instant timeNow = Instant.now();
 		Duration dur = Duration.ofSeconds(26);
 		Instant timeEnd = timeNow.plus(dur);
@@ -170,7 +178,10 @@ public class TeamPlayer extends GamePlayer{
 				System.out.println("Found better move: " + tempSaveMove.get(0) + " @ " +Instant.now().atZone(ZoneOffset.UTC).getHour() +":"+Instant.now().atZone(ZoneOffset.UTC).getMinute()+":"+Instant.now().atZone(ZoneOffset.UTC).getSecond() + " @ depth: " + (depth-1));
 				
 			}
+
 		}
+		//We are player white. The new advanced player is minimax with alpha beta pruning, iterative deepening, and with memoization for "cache"-ing moves and remembering it for subsequent searches. It also uses voronoi diagram heuristic for determining utility of a game state.
+		// Playing against a basic minimmax player that is using a move count heuristic. They are black.
 
 		// Retrieve the best move (Map<String, ArrayList<Integer>>)
 		Map<String, ArrayList<Integer>> bestMove = (Map<String, ArrayList<Integer>>) minimax.get(1);
@@ -190,8 +201,8 @@ public class TeamPlayer extends GamePlayer{
 	}
 
 	public void makeMinMaxMove() {
-		Minimax m = new Minimax();
-		List<Object> minimax = m.execMinimax(board, 1, true, playerId);
+		Minimax mOld = new Minimax();
+		List<Object> minimax = mOld.execMinimax(board, 1, true, playerId);
 
 		// Retrieve the best move (Map<String, ArrayList<Integer>>)
 		Map<String, ArrayList<Integer>> bestMove = (Map<String, ArrayList<Integer>>) minimax.get(1);
