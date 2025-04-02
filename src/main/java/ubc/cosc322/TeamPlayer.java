@@ -1,6 +1,7 @@
 
 package ubc.cosc322;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -139,7 +140,7 @@ public class TeamPlayer extends GamePlayer{
 	public void makeAlphaBetaMove() {
 		Minimax m = new Minimax();
 		Instant timeNow = Instant.now();
-		Duration dur = Duration.ofSeconds(27);
+		Duration dur = Duration.ofSeconds(26);
 		Instant timeEnd = timeNow.plus(dur);
 		int depth = 1;
 		List<Object> minimax = null;
@@ -161,12 +162,12 @@ public class TeamPlayer extends GamePlayer{
 			
 			
 			List<Object> tempSaveMove = m.execAlphaBetaMinimax(board, moveData);
-			System.out.println(Instant.now());
-			moveData.replace(1, depth+1);
+			depth++;
+			moveData.replace(1, depth);
 			
 			if(minimax == null || ((Integer) tempSaveMove.get(0) > (Integer) minimax.get(0))) { //if previous found move better than now or if first run rewrite best move.
 				minimax = tempSaveMove;
-				System.out.println("Found better move: " + tempSaveMove.get(0));
+				System.out.println("Found better move: " + tempSaveMove.get(0) + " @ " +Instant.now().atZone(ZoneOffset.UTC).getHour() +":"+Instant.now().atZone(ZoneOffset.UTC).getMinute()+":"+Instant.now().atZone(ZoneOffset.UTC).getSecond() + " @ depth: " + (depth-1));
 				
 			}
 		}
@@ -180,6 +181,8 @@ public class TeamPlayer extends GamePlayer{
 		ArrayList<Integer> arrow_pos = bestMove.get("arrow-position");
 
 		System.out.println("MY Alpha-Beta MOVE: " + queen_pos_curr +", "+ queen_pos_next +", "+ arrow_pos);
+		System.out.println(" @ " +Instant.now().atZone(ZoneOffset.UTC).getHour() +":"+Instant.now().atZone(ZoneOffset.UTC).getMinute()+":"+Instant.now().atZone(ZoneOffset.UTC).getSecond());
+				
 		//Update client, gui, and local board of move.
 		gameClient.sendMoveMessage(queen_pos_curr, queen_pos_next, arrow_pos);
 		gamegui.updateGameState(queen_pos_curr, queen_pos_next, arrow_pos);

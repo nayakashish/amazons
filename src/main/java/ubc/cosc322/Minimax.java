@@ -147,7 +147,7 @@ public class Minimax {
 
                 
                 alpha = Math.max(alpha, bestMove);
-                moveData.replace(4, alpha);
+                //moveData.replace(4, alpha);
 
                 if(beta <= alpha) {
                     // System.out.println("branch pruned");
@@ -198,7 +198,7 @@ public class Minimax {
                 }
 
                 beta = Math.min(beta, bestMove);
-                moveData.replace(5, beta);
+                //moveData.replace(5, beta);
 
 
                 if(beta <= alpha) {
