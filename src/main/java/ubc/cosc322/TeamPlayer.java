@@ -128,7 +128,7 @@ public class TeamPlayer extends GamePlayer{
     	return true;   	
     }
 
-	public void makeMove() { //temporary jst for quick switching between random moves and minimax
+	public void makeMove() { //temporary for quick switching between random moves and minimax
 		makeAlphaBetaMove();
 		// makeMinMaxMove();
 		// makeRandomMove();
@@ -138,7 +138,7 @@ public class TeamPlayer extends GamePlayer{
 	public void makeAlphaBetaMove() {
 		Minimax m = new Minimax();
 		Instant timeNow = Instant.now();
-		Duration dur = Duration.ofSeconds(24);
+		Duration dur = Duration.ofSeconds(27);
 		Instant timeEnd = timeNow.plus(dur);
 		int depth = 1;
 		List<Object> minimax = null;
@@ -161,10 +161,12 @@ public class TeamPlayer extends GamePlayer{
 			
 			List<Object> tempSaveMove = m.execAlphaBetaMinimax(moveData);
 			depth++;
+			moveData.replace(1, depth);
 			
 			if(minimax == null || ((Integer) tempSaveMove.get(0) > (Integer) minimax.get(0))) { //if previous found move better than now or if first run rewrite best move.
 				minimax = tempSaveMove;
 				System.out.println("Found better move: " + tempSaveMove.get(0));
+				System.out.println(Instant.now());
 			}
 		}
 
