@@ -31,7 +31,7 @@ public class TeamPlayer extends GamePlayer{
     public static void main(String[] args) {				 
     	// COSC322Test player = new COSC322Test(args[0], args[1]);
 
-		TeamPlayer player = new TeamPlayer("Team#18", "cosc322");
+		TeamPlayer player = new TeamPlayer("Team#18#WhyDidItDoThat", "cosc322");
 
     	if(player.getGameGUI() == null) {
     		player.Go();
@@ -68,7 +68,7 @@ public class TeamPlayer extends GamePlayer{
 		if(gamegui != null) {
 			gamegui.setRoomInformation(gameClient.getRoomList());
 		}
-		gameClient.joinRoom("Bear Lake");
+		gameClient.joinRoom("Echo Lake");
     
 	}
 
