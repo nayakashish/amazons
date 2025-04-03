@@ -1,4 +1,3 @@
-
 package ubc.cosc322;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -22,7 +21,6 @@ public class TeamPlayer extends GamePlayer{
 	private Board board;
 	private int playerId;
 	private int opponantId;
- 
 	private ZobristHash zHash;
 	private Minimax m;
     /**
@@ -52,7 +50,7 @@ public class TeamPlayer extends GamePlayer{
     /**
      * Any name and passwd 
      * @param userName
-      * @param passwd
+     * @param passwd
      */
 
 
@@ -70,9 +68,7 @@ public class TeamPlayer extends GamePlayer{
 		if(gamegui != null) {
 			gamegui.setRoomInformation(gameClient.getRoomList());
 		}
-
-
-		gameClient.joinRoom("Beaver Lake");
+		gameClient.joinRoom("Bear Lake");
     
 	}
 
@@ -91,7 +87,6 @@ public class TeamPlayer extends GamePlayer{
 			//Set up memoization
 			this.zHash = new ZobristHash(board);
 			this.m = new Minimax(zHash);
-			
 			
 		} else if (messageType.equals("cosc322.game-action.move")) {
 			System.out.println("Opponant's Move: " + msgDetails); 
@@ -151,17 +146,20 @@ public class TeamPlayer extends GamePlayer{
 		Duration dur = Duration.ofSeconds(26);
 		Instant timeEnd = timeNow.plus(dur);
 		int depth = 1;
-		List<Object> minimax = null;
+		
+		
+		//List<Object> minimax = null;
+		Map<Integer, Object> minimax = null;
 
 		//storing move data in a hashmap for efficiency
 		HashMap<Integer, Object> moveData = new HashMap<Integer, Object>();
 		//moveData.put(0, board);
-		moveData.put(1, depth);
-		moveData.put(2, true);
-		moveData.put(3, playerId);
-		moveData.put(4, Integer.MIN_VALUE);
-		moveData.put(5, Integer.MAX_VALUE);
-		moveData.put(6, timeEnd);
+		moveData.put(1, (Integer) depth);
+		moveData.put(2, (Boolean) true);
+		moveData.put(3, (Integer) playerId);
+		moveData.put(4, (Integer) Integer.MIN_VALUE);
+		moveData.put(5, (Integer) Integer.MAX_VALUE);
+		moveData.put(6, (Instant) timeEnd);
 
 	
 		while(Instant.now().isBefore(timeEnd)) {
@@ -169,15 +167,18 @@ public class TeamPlayer extends GamePlayer{
 			//List<Object> tempSaveMove = m.execAlphaBetaMinimax(board, depth++, true, playerId, Integer.MIN_VALUE, Integer.MAX_VALUE, timeEnd);
 			
 			
-			List<Object> tempSaveMove = m.execAlphaBetaMinimax(board, moveData);
-			depth++;
-			moveData.replace(1, depth);
+			//List<Object> tempSaveMove = m.execAlphaBetaMinimax(board, moveData);
+			Map<Integer, Object> tempSaveMove = m.execAlphaBetaMinimax(board, moveData);
 			
+			
+			System.out.println("Found move: Utility " + tempSaveMove.get(0) + " @ " +Instant.now().atZone(ZoneOffset.UTC).getHour() +":"+Instant.now().atZone(ZoneOffset.UTC).getMinute()+":"+Instant.now().atZone(ZoneOffset.UTC).getSecond() + " @ depth: " + (depth));
 			if(minimax == null || ((Integer) tempSaveMove.get(0) > (Integer) minimax.get(0))) { //if previous found move better than now or if first run rewrite best move.
 				minimax = tempSaveMove;
-				System.out.println("Found better move: " + tempSaveMove.get(0) + " @ " +Instant.now().atZone(ZoneOffset.UTC).getHour() +":"+Instant.now().atZone(ZoneOffset.UTC).getMinute()+":"+Instant.now().atZone(ZoneOffset.UTC).getSecond() + " @ depth: " + (depth-1));
+				System.out.println("Found better move: " + tempSaveMove.get(0) + " @ " +Instant.now().atZone(ZoneOffset.UTC).getHour() +":"+Instant.now().atZone(ZoneOffset.UTC).getMinute()+":"+Instant.now().atZone(ZoneOffset.UTC).getSecond() + " @ depth: " + (depth));
 				
 			}
+			depth++;
+			moveData.replace(1, (Integer) depth);
 
 		}
 		//We are player white. The new advanced player is minimax with alpha beta pruning, iterative deepening, and with memoization for "cache"-ing moves and remembering it for subsequent searches. It also uses voronoi diagram heuristic for determining utility of a game state.
